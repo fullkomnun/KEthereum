@@ -17,42 +17,38 @@ buildscript {
 
 
 subprojects {
-    repositories {
-        jcenter()
-        maven("https://jitpack.io")
-        maven("https://kotlin.bintray.com/kotlinx")
-    }
-
-    apply(plugin = "jacoco")
-    apply(plugin = "maven")
     apply(plugin = "kotlin")
 
-    tasks.withType<Test> {
-        useJUnitPlatform()
-    }
-
-    configure<JavaPluginExtension> {
-        withSourcesJar()
-        withJavadocJar()
-    }
-
+    // a trick to allow gradual conversion of modules to MPP
     afterEvaluate {
+        if (!plugins.hasPlugin("mpp-module")) {
+            apply(plugin = "jacoco")
+            apply(plugin = "maven")
 
-        dependencies {
-            "implementation"("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
+            tasks.withType<Test> {
+                useJUnitPlatform()
+            }
 
-            "testImplementation"("org.assertj:assertj-core:3.19.0")
-            "testImplementation"("org.junit.jupiter:junit-jupiter-api:${Versions.jupiter}")
-            "testImplementation"("org.junit.jupiter:junit-jupiter-params:${Versions.jupiter}")
-            "testRuntime"("org.junit.jupiter:junit-jupiter-engine:${Versions.jupiter}")
+            configure<JavaPluginExtension> {
+                withSourcesJar()
+                withJavadocJar()
+            }
 
-            "testImplementation"("org.jetbrains.kotlin:kotlin-test")
-            "testImplementation"("io.mockk:mockk:1.10.5")
+            val compileTestKotlin by tasks.getting(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class) {
+                kotlinOptions.jvmTarget = "1.8"
+            }
+
+            dependencies {
+                "implementation"("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
+
+                "testImplementation"("org.assertj:assertj-core:3.19.0")
+                "testImplementation"("org.junit.jupiter:junit-jupiter-api:${Versions.jupiter}")
+                "testImplementation"("org.junit.jupiter:junit-jupiter-params:${Versions.jupiter}")
+                "testRuntime"("org.junit.jupiter:junit-jupiter-engine:${Versions.jupiter}")
+
+                "testImplementation"("org.jetbrains.kotlin:kotlin-test")
+                "testImplementation"("io.mockk:mockk:1.10.5")
+            }
         }
-
-
-    }
-    val compileTestKotlin by tasks.getting(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class) {
-        kotlinOptions.jvmTarget = "1.8"
     }
 }
