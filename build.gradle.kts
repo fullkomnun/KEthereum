@@ -19,6 +19,12 @@ buildscript {
 subprojects {
     apply(plugin = "kotlin")
 
+    repositories {
+        jcenter()
+        maven("https://jitpack.io")
+        maven("https://kotlin.bintray.com/kotlinx")
+    }
+
     // a trick to allow gradual conversion of modules to MPP
     afterEvaluate {
         if (!plugins.hasPlugin("mpp-module")) {
